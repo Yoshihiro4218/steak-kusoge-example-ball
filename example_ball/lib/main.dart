@@ -12,7 +12,7 @@ void main() {
   );
 }
 
-class BasketballGame extends FlameGame with HasCollisionDetection, TapCallbacks, MultiTouchDragDetector {
+class BasketballGame extends FlameGame with HasCollisionDetection {
   late Ball ball;
 
   @override
@@ -52,6 +52,7 @@ class Ball extends SpriteComponent with CollisionCallbacks, TapCallbacks, DragCa
         velocity.x = -velocity.x;
         position.x = position.x.clamp(0, game.size.x - size.x);
       }
+
       if (position.y + size.y > game.size.y) {
         velocity.y = -velocity.y * 0.8; // 反発係数
         position.y = game.size.y - size.y;
@@ -61,24 +62,20 @@ class Ball extends SpriteComponent with CollisionCallbacks, TapCallbacks, DragCa
 
   @override
   void onTapDown(TapDownEvent event) {
-    if (toRect().contains(event.localPosition.toOffset())) {
-      beingHeld = true;
-      velocity = Vector2.zero();
-    }
+    beingHeld = true;
+    velocity = Vector2.zero();
   }
 
   @override
   void onDragUpdate(DragUpdateEvent event) {
     if (beingHeld) {
-      position = event.localPosition - size / 2;
+      position += event.delta;
     }
   }
 
   @override
   void onDragEnd(DragEndEvent event) {
-    if (beingHeld) {
-      beingHeld = false;
-      velocity = event.velocity;
-    }
+    beingHeld = false;
+    velocity = event.velocity;
   }
 }
