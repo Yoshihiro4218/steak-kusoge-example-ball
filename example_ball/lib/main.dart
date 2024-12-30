@@ -28,6 +28,7 @@ class BasketballGame extends FlameGame with HasCollisionDetection {
 class Ball extends SpriteComponent with CollisionCallbacks, TapCallbacks, DragCallbacks {
   Vector2 velocity = Vector2.zero();
   bool beingHeld = false;
+  Vector2 lastDragPosition = Vector2.zero(); // 新たに追加
   final double gravity = 500;
   final double restitution = 0.3; // 反発係数
   final double damping = 0.99; // 減衰係数
@@ -62,12 +63,10 @@ class Ball extends SpriteComponent with CollisionCallbacks, TapCallbacks, DragCa
         velocity.x = -velocity.x;
         position.x = position.x.clamp(0, game.size.x - size.x);
       }
-
       if (position.y < 0) {
         velocity.y = -velocity.y * restitution;
         position.y = 0;
       }
-
       if (position.y + size.y > game.size.y) {
         velocity.y = -velocity.y * restitution; // 反発係数を使用
         position.y = game.size.y - size.y;
@@ -90,12 +89,15 @@ class Ball extends SpriteComponent with CollisionCallbacks, TapCallbacks, DragCa
   void onTapDown(TapDownEvent event) {
     beingHeld = true;
     velocity = Vector2.zero();
+    lastDragPosition = event.localPosition; // タップ開始位置を保存
   }
 
   @override
   void onDragUpdate(DragUpdateEvent event) {
     if (beingHeld) {
-      position += event.delta;
+      final dragDelta = event.localPosition - lastDragPosition;
+      position += dragDelta;
+      lastDragPosition = event.localPosition; // 現在の位置を更新
     }
   }
 
