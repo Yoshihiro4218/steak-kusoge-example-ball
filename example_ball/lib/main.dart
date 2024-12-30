@@ -29,10 +29,12 @@ class Ball extends SpriteComponent with CollisionCallbacks, TapCallbacks, DragCa
   Vector2 velocity = Vector2.zero();
   bool beingHeld = false;
   final double gravity = 500;
-  final double restitution = 0.5; // 反発係数
+  final double restitution = 0.3; // 反発係数
   final double damping = 0.99; // 減衰係数
 
-  Ball();
+  Ball() {
+    anchor = Anchor.center; // 画像の中心を回転の軸として設定
+  }
 
   @override
   Future<void> onLoad() async {
@@ -52,6 +54,9 @@ class Ball extends SpriteComponent with CollisionCallbacks, TapCallbacks, DragCa
       // 減衰効果を適用
       velocity *= damping;
 
+      // ボールの回転を更新
+      updateRotation(dt);
+
       // 画面端で跳ね返るロジック
       if (position.x < 0 || position.x + size.x > game.size.x) {
         velocity.x = -velocity.x;
@@ -67,6 +72,17 @@ class Ball extends SpriteComponent with CollisionCallbacks, TapCallbacks, DragCa
         velocity.y = -velocity.y * restitution; // 反発係数を使用
         position.y = game.size.y - size.y;
       }
+    }
+  }
+
+  void updateRotation(double dt) {
+    const double rotationSpeed = 0.06;
+    angle += velocity.x * rotationSpeed * dt;
+
+    if (angle > 2 * 3.14159) {
+      angle -= 2 * 3.14159;
+    } else if (angle < 0) {
+      angle += 2 * 3.14159;
     }
   }
 
