@@ -29,6 +29,8 @@ class Ball extends SpriteComponent with CollisionCallbacks, TapCallbacks, DragCa
   Vector2 velocity = Vector2.zero();
   bool beingHeld = false;
   final double gravity = 500;
+  final double restitution = 0.5; // 反発係数
+  final double damping = 0.99; // 減衰係数
 
   Ball();
 
@@ -47,14 +49,22 @@ class Ball extends SpriteComponent with CollisionCallbacks, TapCallbacks, DragCa
       velocity.y += gravity * dt;
       position += velocity * dt;
 
+      // 減衰効果を適用
+      velocity *= damping;
+
       // 画面端で跳ね返るロジック
       if (position.x < 0 || position.x + size.x > game.size.x) {
         velocity.x = -velocity.x;
         position.x = position.x.clamp(0, game.size.x - size.x);
       }
 
+      if (position.y < 0) {
+        velocity.y = -velocity.y * restitution;
+        position.y = 0;
+      }
+
       if (position.y + size.y > game.size.y) {
-        velocity.y = -velocity.y * 0.8; // 反発係数
+        velocity.y = -velocity.y * restitution; // 反発係数を使用
         position.y = game.size.y - size.y;
       }
     }
